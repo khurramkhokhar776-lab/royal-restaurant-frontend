@@ -1,0 +1,5 @@
+import React,{createContext,useContext,useEffect,useMemo,useState} from "react";
+const C=createContext();export const useCart=()=>useContext(C);
+export function CartProvider({children}){const [items,setItems]=useState(()=>{try{return JSON.parse(localStorage.getItem("rb_cart"))||[]}catch{return[]}});useEffect(()=>localStorage.setItem("rb_cart",JSON.stringify(items)),[items]);
+const add=(product,qty=1)=>setItems(old=>{const hit=old.find(i=>i._id===product._id);return hit?old.map(i=>i._id===product._id?{...i,quantity:i.quantity+qty}:i):[...old,{...product,quantity:qty}]});
+const setQty=(id,q)=>setItems(old=>q<=0?old.filter(i=>i._id!==id):old.map(i=>i._id===id?{...i,quantity:q}:i));const remove=id=>setItems(old=>old.filter(i=>i._id!==id));const clear=()=>setItems([]);const subtotal=useMemo(()=>items.reduce((s,i)=>s+i.price*i.quantity,0),[items]);const count=useMemo(()=>items.reduce((s,i)=>s+i.quantity,0),[items]);return <C.Provider value={{items,add,setQty,remove,clear,subtotal,count}}>{children}</C.Provider>}
